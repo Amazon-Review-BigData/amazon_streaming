@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Kafka client kütüphanesi yükle
+RUN pip install --no-cache-dir kafka-python==2.0.2
+
+# Producer script'ini kopyala
+COPY kafka_producer.py /app/
+
+# Kafka'ya bağlanma sağlanana kadar bekle
+ENTRYPOINT ["python", "/app/kafka_producer.py"]
