@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Ortam değişkenlerinden konfigürasyon al
 KAFKA_BROKERS = os.getenv("KAFKA_BROKERS", "kafka:29092").split(",")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "amazon_reviews")
-DATA_FILE = os.getenv("DATA_FILE", "/data/amazon_reviews_us_Electronics_v1_00.tsv")
+DATA_FILE = os.getenv("DATA_FILE", "/data/amazon_reviews_us_Mobile_Electronics_v1_00.tsv")
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "50000"))
 BATCH_DELAY = float(os.getenv("BATCH_DELAY", "0.5"))
 

@@ -42,6 +42,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_MESSAGE_MAX_BYTES: 536870912
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 536870912
     ports:
       - "9092:9092"   # Dış erişim
       - "29092:29092" # İç iletişim (Docker ağında)
@@ -69,7 +71,9 @@ services:
     networks:
       - big_data_network
     volumes:
-      - spark_master_data:/opt/spark/work
+      #- spark_master_data:/opt/spark/work
+      - ./spark:/opt/spark-apps
+      - ./data:/data
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
       --host spark-master
@@ -95,8 +99,9 @@ services:
     networks:
       - big_data_network
     volumes:
-      - spark_worker_1_data:/opt/spark/work
-      - ./data:/data:ro
+      #- spark_worker_1_data:/opt/spark/work
+      - ./data:/data
+      - ./spark:/opt/spark-apps
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
       spark://spark-master:7077
@@ -121,8 +126,9 @@ services:
     networks:
       - big_data_network
     volumes:
-      - spark_worker_2_data:/opt/spark/work
-      - ./data:/data:ro
+      - ./spark:/opt/spark-apps
+      #- spark_worker_2_data:/opt/spark/work
+      - ./data:/data
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
       spark://spark-master:7077
@@ -141,7 +147,7 @@ services:
     environment:
       KAFKA_BROKERS: kafka:29092
       KAFKA_TOPIC: amazon_reviews
-      DATA_FILE: /data/amazon_reviews_us_Major_Appliances_v1_00.tsv
+      DATA_FILE: /data/amazon_reviews_us_Mobile_Electronics_v1_00.tsv
       CHUNK_SIZE: 50000  
       BATCH_DELAY: 0.5
     networks:
