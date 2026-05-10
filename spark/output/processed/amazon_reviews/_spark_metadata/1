@@ -1,0 +1,2 @@
+v1
+{"path":"file:///opt/spark-apps/output/processed/amazon_reviews/part-00000-1c42d488-834b-48c1-aa31-a6938cfade44-c000.snappy.parquet","size":884938,"isDir":false,"modificationTime":1778443805631,"blockReplication":1,"blockSize":33554432,"action":"add"}
