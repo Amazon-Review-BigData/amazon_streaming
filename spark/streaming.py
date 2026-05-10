@@ -108,16 +108,16 @@ analytics_query = rating_count.writeStream \
     .start()
 
 # =========================================================
-#  Write
+# Write streaming output to a shared path
 # =========================================================
+
+output_path = "/data/processed/amazon_reviews"
+checkpoint_path = "/data/checkpoints/amazon_reviews"
 
 delta_query = clean_df.writeStream \
     .format("parquet") \
     .outputMode("append") \
-    .option(
-        "checkpointLocation",
-        "/tmp/checkpoints/amazon_reviews"
-    ) \
-    .start("/tmp/delta/amazon_reviews")
+    .option("checkpointLocation", checkpoint_path) \
+    .start(output_path)
 
 delta_query.awaitTermination()
