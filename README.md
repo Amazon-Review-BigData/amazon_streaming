@@ -17,7 +17,7 @@ docker compose up -d
 
 ## Adım 4: Keşifsel Veri Analizi (EDA)
 
-1. Önce streaming adımının ` /data/processed/amazon_reviews ` klasörüne veri yazdığından emin olun.
+1. Önce streaming adımının `/opt/spark-apps/output/processed/amazon_reviews` klasörüne veri yazdığından emin olun.
 2. Spark container'ı içinde EDA scriptini çalıştırın.
 
 Örnek:
@@ -29,7 +29,7 @@ docker exec -it big_data_spark_master /opt/spark/bin/spark-submit /opt/spark-app
 EDA çıktıları şu klasöre yazılır:
 
 ```bash
-/data/eda_outputs
+/opt/spark-apps/output/eda_outputs
 ```
 
 Bu adımda üretilen özetler:

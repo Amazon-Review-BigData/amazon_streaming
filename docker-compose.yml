@@ -37,7 +37,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://big_data_kafka:29092,PLAINTEXT_HOST://localhost:9092  
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -74,6 +74,7 @@ services:
       #- spark_master_data:/opt/spark/work
       - ./spark:/opt/spark-apps
       - ./data:/data
+      - ./spark/output:/spark/output # EKLENDİ
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
       --host spark-master
@@ -86,6 +87,7 @@ services:
   spark-worker-1:
     image: docker.io/library/spark:3.5.0
     container_name: big_data_spark_worker_1
+    user: root # EKLENDİ
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
@@ -102,6 +104,7 @@ services:
       #- spark_worker_1_data:/opt/spark/work
       - ./data:/data
       - ./spark:/opt/spark-apps
+      - ./spark/output:/spark/output # EKLENDİ
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
       spark://spark-master:7077
@@ -113,6 +116,7 @@ services:
   spark-worker-2:
     image: docker.io/library/spark:3.5.0
     container_name: big_data_spark_worker_2
+    user: root # EKLENDİ
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
@@ -129,6 +133,7 @@ services:
       - ./spark:/opt/spark-apps
       #- spark_worker_2_data:/opt/spark/work
       - ./data:/data
+      - ./spark/output:/spark/output # EKLENDİ
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
       spark://spark-master:7077
@@ -145,7 +150,7 @@ services:
     depends_on:
       - kafka
     environment:
-      KAFKA_BROKERS: kafka:29092
+      KAFKA_BROKERS: big_data_kafka:29092
       KAFKA_TOPIC: amazon_reviews
       DATA_FILE: /data/amazon_reviews_us_Mobile_Electronics_v1_00.tsv
       CHUNK_SIZE: 50000  
@@ -156,6 +161,21 @@ services:
       - ./data:/data:ro
       - ./kafka_producer.py:/app/kafka_producer.py:ro
     command: python /app/kafka_producer.py
+
+  # =========================================================================
+  # Jupyter Notebook - Sunum ve Görselleştirme İçin (İçinde Pandas/Seaborn var)
+  # =========================================================================
+  jupyter:
+    image: jupyter/scipy-notebook:latest
+    container_name: big_data_jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_TOKEN=sunum123  # Sunum sırasında gireceğimiz şifre
+    volumes:
+      - ./spark:/home/jovyan/work  # Projedeki spark klasörünü Jupyter'e bağlıyoruz
+    networks:
+      - big_data_network
 
 # =========================================================================
 # Volumes - Veri persistence
@@ -173,6 +193,8 @@ volumes:
     driver: local
   spark_worker_2_data:
     driver: local
+
+
 
 # =========================================================================
 # Networks - Konteyner iletişimi

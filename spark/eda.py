@@ -17,8 +17,8 @@ def main():
     spark = build_spark_session()
     spark.sparkContext.setLogLevel("WARN")
 
-    input_path = "/data/processed/amazon_reviews"
-    output_path = "/data/eda_outputs"
+    input_path = "/opt/spark-apps/output/processed/amazon_reviews"
+    output_path = "/opt/spark-apps/output/eda_outputs"
 
     reviews_df = spark.read.parquet(input_path)
 
