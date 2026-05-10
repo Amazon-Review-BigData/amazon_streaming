@@ -41,7 +41,7 @@ schema = StructType([
 
 raw_df = spark.readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "kafka:29092") \
+    .option("kafka.bootstrap.servers", "big_data_kafka:29092") \
     .option("subscribe", "amazon_reviews") \
     .option("startingOffsets", "latest") \
     .load()
@@ -108,16 +108,16 @@ analytics_query = rating_count.writeStream \
     .start()
 
 # =========================================================
-#  Write
+# Write streaming output to the mounted Spark app directory
 # =========================================================
+
+output_path = "/opt/spark-apps/output/processed/amazon_reviews"
+checkpoint_path = "/opt/spark-apps/output/checkpoints/amazon_reviews"
 
 delta_query = clean_df.writeStream \
     .format("parquet") \
     .outputMode("append") \
-    .option(
-        "checkpointLocation",
-        "/tmp/checkpoints/amazon_reviews"
-    ) \
-    .start("/tmp/delta/amazon_reviews")
+    .option("checkpointLocation", checkpoint_path) \
+    .start(output_path)
 
 delta_query.awaitTermination()
