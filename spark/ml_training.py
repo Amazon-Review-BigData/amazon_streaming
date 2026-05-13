@@ -36,7 +36,7 @@ CLASS_LABELS = [1, 2, 3, 4, 5]
 def build_spark_session():
     return SparkSession.builder \
         .appName("AmazonReviewsModelTraining") \
-        .master("spark://spark-master:7077") \
+        .master("local[*]") \
         .getOrCreate()
 
 def load_gold_features(spark, input_path):
@@ -241,20 +241,31 @@ def save_confusion_matrix_svg(matrix, class_labels, output_path):
     Path(output_path).write_text("\n".join(lines), encoding="utf-8")
 
 def flatten_feature_importance(model_stage, feature_names):
-    # Çakışmaları temizleyip tüm model tipleri için uyumlu hale getirdik
+    # Ağaç bazlı modeller için featureImportances
     if hasattr(model_stage, "featureImportances"):
         importances = vector_to_list(model_stage.featureImportances, len(feature_names))
         return list(zip(feature_names, importances))
-    if hasattr(model_stage, "coefficients"):
-        coefficients = vector_to_list(model_stage.coefficients, len(feature_names))
-        return list(zip(feature_names, [abs(value) for value in coefficients]))
-    if hasattr(model_stage, "coefficientMatrix"):
+    
+    # Çok sınıflı (Multinomial) modellerde ".coefficients" çağrıldığında SparkException fırlatılır.
+    # Bu yüzden hasattr yerine "try-except" bloğu ile önce matrix'i deniyoruz.
+    try:
         matrix = model_stage.coefficientMatrix
         importances = []
         for column_index in range(matrix.numCols):
             column_values = [abs(value) for value in matrix_column_values(matrix, column_index)]
             importances.append(sum(column_values) / len(column_values))
         return list(zip(feature_names, importances))
+    except Exception:
+        pass
+
+    # İki sınıflı modeller için standart katsayılar
+    try:
+        coefficients = vector_to_list(model_stage.coefficients, len(feature_names))
+        return list(zip(feature_names, [abs(value) for value in coefficients]))
+    except Exception:
+        pass
+        
+    # Naive Bayes için theta
     if hasattr(model_stage, "theta"):
         matrix = model_stage.theta
         importances = []
@@ -263,6 +274,7 @@ def flatten_feature_importance(model_stage, feature_names):
             spread = max(column_values) - min(column_values)
             importances.append(abs(spread))
         return list(zip(feature_names, importances))
+        
     return [(feature_name, 0.0) for feature_name in feature_names]
 
 def feature_importance_for_model(pipeline_model, feature_names):
