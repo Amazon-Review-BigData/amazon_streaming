@@ -5,7 +5,7 @@ from pyspark.sql.functions import *
 def build_spark_session():
     return SparkSession.builder \
         .appName("AmazonReviewsEDA") \
-        .master("spark://spark-master:7077") \
+        .master("local[*]") \
         .getOrCreate()
 
 

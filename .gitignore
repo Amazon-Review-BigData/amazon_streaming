@@ -5,3 +5,5 @@ __pycache__/
 *.tsv
 data/
 .DS_Store
+
+spark/output/

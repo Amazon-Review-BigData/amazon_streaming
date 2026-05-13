@@ -17,7 +17,7 @@ OUTPUT_COLUMNS = [
 def build_spark_session():
     return SparkSession.builder \
         .appName("AmazonReviewsFeatureEngineering") \
-        .master("spark://spark-master:7077") \
+        .master("local[*]") \
         .getOrCreate()
 
 def load_silver_data(spark, input_path):
